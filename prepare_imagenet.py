@@ -59,6 +59,19 @@ def _find_local_parquets(split: str) -> list[Path]:
     return []
 
 
+def _download_split(split: str) -> list[Path]:
+    from huggingface_hub import snapshot_download
+
+    print(f"\nDownloading ILSVRC/imagenet-1k ({split}) from HuggingFace...")
+    snapshot_download(
+        "ILSVRC/imagenet-1k",
+        repo_type="dataset",
+        allow_patterns=[f"data/{split}-*.parquet"],
+    )
+    parquets = _find_local_parquets(split)
+    return parquets
+
+
 @dataclass
 class Example:
     image: "PIL.Image.Image"
@@ -78,11 +91,7 @@ def iter_imagenet(split: str) -> Iterator[Example]:
 
     parquets = _find_local_parquets(split)
     if not parquets:
-        raise FileNotFoundError(
-            f"No local parquet files for '{split}'. Download first:\n"
-            f'  python -c "from datasets import load_dataset; '
-            f"load_dataset('ILSVRC/imagenet-1k', split='{split}')\""
-        )
+        parquets = _download_split(split)
 
     total = sum(pq.read_metadata(p).num_rows for p in parquets)
     pbar = tqdm(total=total, desc=f"Reading {split}")

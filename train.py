@@ -40,9 +40,6 @@ class LatentDataset:
         return torch.from_numpy(arr[idx]).float().to(device)
 
 
-# --- sample queue (MoCo-style) ---
-
-
 class SampleQueue:
     """Per-class and global queues for caching generated/real samples."""
 
@@ -99,15 +96,12 @@ class FeatureEncoder(nn.Module):
         from torchvision.models import ResNet50_Weights, resnet50
 
         # VAE decoder (latent → pixel)
-        print("Loading SD-VAE decoder...")
         self.vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-ema")
         self.vae = self.vae.to(device).eval()
         for p in self.vae.parameters():
             p.requires_grad_(False)
         self.vae_scale = 0.18215
 
-        # ResNet-50 feature extractor
-        print("Loading ResNet-50...")
         weights = ResNet50_Weights.DEFAULT
         self.resnet = resnet50(weights=weights).to(device).eval()
         for p in self.resnet.parameters():
