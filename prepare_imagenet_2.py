@@ -249,7 +249,7 @@ def _flush_parts(
     for cid, lats in class_latents.items():
         if not lats:
             continue
-        arr = np.concatenate(lats)
+        arr = np.stack(lats)
         pid = part_counter.get(cid, 0)
         np.save(tmp_dir / f"{cid}_part{pid:04d}.npy", arr)
         part_counter[cid] = pid + 1
