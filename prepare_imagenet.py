@@ -46,7 +46,13 @@ EXPECTED_SAMPLES = {"train": 1_281_167, "val": 50_000}
 
 def _find_local_parquets(split: str) -> list[Path]:
     """Find local HF-cached parquet files for a split."""
-    cache_dir = Path.home() / ".cache/huggingface/hub/datasets--ILSVRC--imagenet-1k/snapshots"
+    import os
+
+    hf_hub_cache = os.environ.get("HF_HUB_CACHE")
+    if not hf_hub_cache:
+        hf_home = os.environ.get("HF_HOME", str(Path.home() / ".cache/huggingface"))
+        hf_hub_cache = str(Path(hf_home) / "hub")
+    cache_dir = Path(hf_hub_cache) / "datasets--ILSVRC--imagenet-1k/snapshots"
     if not cache_dir.exists():
         return []
     for snap in cache_dir.iterdir():
